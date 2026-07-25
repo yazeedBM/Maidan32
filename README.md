@@ -1,0 +1,34 @@
+# 🏆 ميدان (Maidan) — Hackathon Directory & Team Matching
+
+A minimal, full-stack application designed for browsing hackathons and helping solo participants find teams seamlessly.
+
+**Tech Stack:** Next.js 14 (App Router) · PostgreSQL (via Prisma on [Neon](https://neon.tech)) · JWT Auth (httpOnly cookie) · Tailwind CSS
+
+---
+
+## ✨ Features
+
+* **Hackathon Directory:** Browse all available hackathons and click into dedicated detail pages.
+* **External Redirects:** Prominent calls-to-action on detail pages linking out to official hackathon websites.
+* **Seamless Team Formation:** Admins can open teams; users can join with a single click. A global **"أعثر على فريق"** page allows users to search open teams across all hackathons.
+* **Privacy-First Contact Info:** A member's email and phone number are only revealed to their active teammates (strictly enforced server-side).
+* **Mini-CV Profiles:** Users can easily build and edit their bio, skills, experience entries, and external links at any time.
+* **Secure Authentication:** Simple email/password signup and login for both Admins and Regular Users, utilizing JWTs stored in httpOnly cookies.
+* **Admin Dashboard:** Powerful controls to add or delete hackathons and generate open teams.
+
+---
+
+## 🚀 Getting Started (Local Development)
+
+### 1. Database Setup (Neon)
+The database uses a free, hosted Postgres instance on Neon—no credit card required, and it works out of the box with Vercel without managing persistent disks.
+1. Go to [neon.tech](https://neon.tech) and sign up.
+2. Create a new project (any name/region works).
+3. Copy the **connection string** from your project dashboard (it will start with `postgresql://...`).
+
+### 2. Environment Configuration
+Clone the repository and install the dependencies:
+```bash
+npm install
+cp .env.local.example .env.local
+cp .env.local.example .env
