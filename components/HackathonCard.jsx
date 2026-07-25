@@ -1,55 +1,65 @@
 import Link from "next/link";
-import { CalendarIcon, UsersIcon, ClockIcon, MoneyIcon, LocationIcon } from "./Icons";
+import { HackathonStats } from "./Chips";
+import { OutlineBlueButton } from "./Buttons";
 
-export default function HackathonCard({ hackathon, isAdmin }) {
-  const dateStr = new Date(hackathon.date).toLocaleDateString("ar-SA", {
-    day: "numeric",
-    month: "long",
-  });
+/**
+ * Hackathon list card (hackathons page): white card, square image on the
+ * right (RTL start), title + fields line, stat chips row, and an
+ * "اعرف أكثر" outline button at the far left.
+ *
+ * The Figma frame shows a solid red square where the hackathon image goes —
+ * rendered here as the real image with a red PLACEHOLDER fallback.
+ */
+export default function HackathonCard({ hackathon }) {
+  const { id, title, fields, duration, members, prize, date, image } =
+    hackathon;
 
   return (
-    <div className="card flex flex-col gap-4 p-4 sm:flex-row sm:items-center">
-      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-navy-900 text-lg font-black text-brand-orange">
-        {hackathon.title?.charAt(0) || "ه"}
-      </div>
+    <article className="card p-5 sm:p-6">
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+        {/* Image — right side in RTL */}
+        <div className="h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-[#C00000]">
+          {image && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={image}
+              alt={`شعار ${title}`}
+              className="h-full w-full object-cover"
+              loading="lazy"
+            />
+          )}
+        </div>
 
-      <div className="min-w-0 flex-1">
-        <Link href={`/hackathons/${hackathon._id}`}>
-          <h3 className="truncate text-base font-extrabold text-navy-900 hover:text-brand-blue">
-            {hackathon.title}
+        {/* Text + chips */}
+        <div className="min-w-0 flex-1">
+          <h3 className="text-xl font-extrabold text-ink sm:text-2xl">
+            <Link
+              href={`/hackathons/${id}`}
+              className="transition-colors hover:text-primary"
+            >
+              {title}
+            </Link>
           </h3>
-        </Link>
-        <p className="mt-0.5 truncate text-xs text-navy-800/60">{hackathon.organizer}</p>
+          <p className="mt-1 text-sm font-semibold text-ink-soft">
+            مجالات الهاكاثون: {fields}
+          </p>
 
-        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-navy-800/70">
-          <span className="flex items-center gap-1">
-            <LocationIcon /> {hackathon.location}
-          </span>
-          <span className="flex items-center gap-1">
-            <CalendarIcon /> {dateStr}
-          </span>
-          <span className="flex items-center gap-1">
-            <MoneyIcon /> {hackathon.prize?.toLocaleString("ar-SA") || 0} $
-          </span>
-          <span className="flex items-center gap-1">
-            <UsersIcon /> {hackathon.teamSizeMin}-{hackathon.teamSizeMax} أعضاء
-          </span>
-          <span className="flex items-center gap-1">
-            <ClockIcon /> {hackathon.durationDays} يوم
-          </span>
+          <HackathonStats
+            duration={duration}
+            members={members}
+            prize={prize}
+            date={date}
+            className="mt-4"
+          />
+        </div>
+
+        {/* CTA — far left */}
+        <div className="shrink-0 sm:self-center">
+          <OutlineBlueButton href={`/hackathons/${id}`} size="sm">
+            اعرف أكثر
+          </OutlineBlueButton>
         </div>
       </div>
-
-      <div className="flex shrink-0 gap-2 sm:flex-col">
-        <Link href={`/hackathons/${hackathon._id}`} className="btn-blue flex-1 sm:flex-none">
-          أكثر على فريق
-        </Link>
-        {isAdmin && (
-          <Link href={`/admin/teams?hackathon=${hackathon._id}`} className="btn-orange flex-1 sm:flex-none">
-            أنشئ فريق
-          </Link>
-        )}
-      </div>
-    </div>
+    </article>
   );
 }

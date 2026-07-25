@@ -1,125 +1,133 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import Logo from "./Logo";
 
-const links = [
+const NAV_LINKS = [
   { href: "/", label: "الرئيسية" },
   { href: "/hackathons", label: "الهاكاثونات" },
   { href: "/teams", label: "أعثر على فريق" },
   { href: "/#about", label: "عن ميدان" },
 ];
 
-export default function Navbar({ user, transparent = false }) {
-  const router = useRouter();
+/**
+ * Site navigation bar.
+ *
+ * variant="dark"  → transparent over dark hero images (homepage, hackathons):
+ *                   white links, white logo wordmark.
+ * variant="light" → over the light matching-page hero:
+ *                   blue links, blue logo wordmark.
+ *
+ * Note: screenshots 1–2 show a Latin nav (Home / Hackathons / TeamMaker /
+ * About) while screenshots 3–5 show the Arabic nav. The Arabic version is
+ * used consistently here since it matches the final RTL pages.
+ */
+export default function Navbar({ variant = "dark" }) {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
-  async function handleLogout() {
-    await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/");
-    router.refresh();
-  }
+  const isDark = variant === "dark";
+
+  const linkBase =
+    "text-base font-semibold transition-colors duration-150 py-1";
+  const linkColor = isDark
+    ? "text-white/90 hover:text-accent"
+    : "text-primary hover:text-accent";
+  const activeColor = "text-accent";
 
   return (
     <header
-      className={`sticky top-0 z-40 ${
-        transparent ? "bg-navy-950/95 backdrop-blur" : "bg-navy-950"
-      } border-b border-white/5`}
+      className={`absolute inset-x-0 top-0 z-40 ${
+        isDark ? "" : "bg-transparent"
+      }`}
     >
-      <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3.5 md:px-6">
-        <Logo variant="light" />
+      <div className="container-site flex h-20 items-center justify-between">
+        {/* Logo — sits on the right in RTL */}
+        <Link href="/" aria-label="ميدان — الصفحة الرئيسية" className="shrink-0">
+          <Logo tone={isDark ? "light" : "dark"} />
+        </Link>
 
-        <ul className="hidden items-center gap-7 md:flex">
-          {links.map((l) => (
-            <li key={l.href}>
-              <Link
-                href={l.href}
-                className="text-sm font-semibold text-white/80 transition hover:text-white"
-              >
-                {l.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
+        {/* Desktop links */}
+        <nav aria-label="التنقل الرئيسي" className="hidden md:block">
+          <ul className="flex items-center gap-8 lg:gap-10">
+            {NAV_LINKS.map((link) => {
+              const isActive =
+                link.href === "/"
+                  ? pathname === "/"
+                  : pathname.startsWith(link.href.replace("/#about", "/x"));
+              return (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className={`${linkBase} ${
+                      isActive ? activeColor : linkColor
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
 
-        <div className="hidden items-center gap-3 md:flex">
-          {user ? (
-            <>
-              {user.role === "admin" && (
-                <Link href="/admin/hackathons" className="text-sm font-semibold text-brand-orange">
-                  لوحة المشرف
-                </Link>
-              )}
-              <Link href="/profile" className="text-sm font-semibold text-white/80 hover:text-white">
-                {user.fullName}
-              </Link>
-              <button onClick={handleLogout} className="btn-outline !py-2">
-                تسجيل الخروج
-              </button>
-            </>
-          ) : (
-            <>
-              <Link href="/login" className="btn-outline !py-2">
-                تسجيل الدخول
-              </Link>
-              <Link href="/signup" className="btn-orange !py-2">
-                إنشاء حساب
-              </Link>
-            </>
-          )}
-        </div>
-
+        {/* Mobile menu button */}
         <button
-          className="text-white md:hidden"
+          type="button"
           onClick={() => setOpen((v) => !v)}
-          aria-label="القائمة"
+          aria-expanded={open}
+          aria-controls="mobile-nav"
+          aria-label={open ? "إغلاق القائمة" : "فتح القائمة"}
+          className={`md:hidden inline-flex h-10 w-10 items-center justify-center rounded-field ${
+            isDark ? "text-white" : "text-primary"
+          }`}
         >
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M4 6h16M4 12h16M4 18h16" />
+          <svg
+            className="h-6 w-6"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            {open ? (
+              <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
+            ) : (
+              <path strokeLinecap="round" d="M4 7h16M4 12h16M4 17h16" />
+            )}
           </svg>
         </button>
-      </nav>
+      </div>
 
+      {/* Mobile dropdown */}
       {open && (
-        <div className="border-t border-white/10 px-4 pb-4 md:hidden">
-          <ul className="flex flex-col gap-3 pt-3">
-            {links.map((l) => (
-              <li key={l.href}>
-                <Link href={l.href} className="text-sm font-semibold text-white/85" onClick={() => setOpen(false)}>
-                  {l.label}
+        <nav
+          id="mobile-nav"
+          aria-label="التنقل الرئيسي للجوال"
+          className={`md:hidden mx-4 rounded-card p-4 shadow-card-lg ${
+            isDark ? "bg-dark-soft" : "bg-white"
+          }`}
+        >
+          <ul className="flex flex-col gap-1">
+            {NAV_LINKS.map((link) => (
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  onClick={() => setOpen(false)}
+                  className={`block rounded-field px-3 py-2.5 text-base font-semibold ${
+                    isDark
+                      ? "text-white/90 hover:bg-white/10"
+                      : "text-primary hover:bg-surface-blue"
+                  }`}
+                >
+                  {link.label}
                 </Link>
               </li>
             ))}
           </ul>
-          <div className="mt-4 flex flex-col gap-2">
-            {user ? (
-              <>
-                {user.role === "admin" && (
-                  <Link href="/admin/hackathons" className="btn-outline w-full">
-                    لوحة المشرف
-                  </Link>
-                )}
-                <Link href="/profile" className="btn-outline w-full">
-                  {user.fullName}
-                </Link>
-                <button onClick={handleLogout} className="btn-orange w-full">
-                  تسجيل الخروج
-                </button>
-              </>
-            ) : (
-              <>
-                <Link href="/login" className="btn-outline w-full">
-                  تسجيل الدخول
-                </Link>
-                <Link href="/signup" className="btn-orange w-full">
-                  إنشاء حساب
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
+        </nav>
       )}
     </header>
   );

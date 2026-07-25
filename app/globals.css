@@ -2,48 +2,133 @@
 @tailwind components;
 @tailwind utilities;
 
-html,
-body {
-  scroll-behavior: smooth;
+/* ------------------------------------------------------------------ */
+/* Base                                                                */
+/* ------------------------------------------------------------------ */
+
+@layer base {
+  :root {
+    --header-height: 5rem;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-surface font-sans text-ink antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Headings inherit the rounded brand face; weights set per component */
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-bold;
+  }
+
+  /* Visible keyboard focus everywhere, brand-colored */
+  :focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-white;
+  }
+
+  /* Respect users who prefer reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  ::selection {
+    @apply bg-accent/30 text-ink;
+  }
 }
 
-body {
-  background-color: #f7f8fa;
-  color: #0b1220;
+/* ------------------------------------------------------------------ */
+/* Reusable component classes                                          */
+/* ------------------------------------------------------------------ */
+
+@layer components {
+  /* Page-width container used on every section */
+  .container-site {
+    @apply mx-auto w-full max-w-container px-4 sm:px-6 lg:px-10;
+  }
+
+  /* ---- Form fields (create-ad + join-request forms) -------------- */
+  .field-label {
+    @apply mb-2 block text-sm font-bold text-primary;
+  }
+
+  .field-input {
+    @apply w-full rounded-field border border-transparent bg-surface-field px-4 py-3 text-sm text-ink
+      placeholder:text-ink-faint
+      focus:border-primary focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary
+      transition-colors duration-150;
+  }
+
+  .field-select {
+    @apply field-input appearance-none bg-no-repeat pl-10 cursor-pointer;
+    /* Chevron sits on the LEFT in RTL layouts */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-position: left 0.9rem center;
+  }
+
+  .field-textarea {
+    @apply field-input min-h-[7rem] resize-y;
+  }
+
+  /* ---- Chips ------------------------------------------------------ */
+  /* Neutral info chip: date / location / prizes / members / duration */
+  .stat-chip {
+    @apply inline-flex items-center gap-1.5 rounded-field border border-surface-field bg-white
+      px-3 py-1.5 text-xs font-semibold text-ink-soft shadow-chip;
+  }
+
+  /* Orange soft chip: "عن بعد \ حضوري" and "مدة العمل التقريبية" */
+  .stat-chip-orange {
+    @apply inline-flex items-center gap-1.5 rounded-pill bg-accent-soft px-3 py-1.5
+      text-xs font-semibold text-accent;
+  }
+
+  /* Category badge: "الصحة" / "الذكاء الاصطناعي" */
+  .category-badge {
+    @apply inline-flex items-center rounded-pill bg-accent-soft px-3 py-1 text-xs font-bold text-primary;
+  }
+
+  /* ---- Cards ------------------------------------------------------ */
+  .card {
+    @apply rounded-card bg-white shadow-card;
+  }
+
+  /* ---- Section headings ------------------------------------------- */
+  .section-title {
+    @apply text-3xl font-extrabold text-primary sm:text-4xl lg:text-5xl;
+  }
 }
 
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-thumb {
-  background: #d8dde5;
-  border-radius: 8px;
-}
+/* ------------------------------------------------------------------ */
+/* Utilities                                                           */
+/* ------------------------------------------------------------------ */
 
-.btn {
-  @apply inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-bold transition-colors duration-150 whitespace-nowrap;
-}
-.btn-orange {
-  @apply btn bg-brand-orange text-navy-950 hover:bg-brand-orange-dark;
-}
-.btn-blue {
-  @apply btn bg-brand-blue text-white hover:bg-brand-blue-dark;
-}
-.btn-outline {
-  @apply btn border border-white/40 text-white hover:bg-white/10;
-}
-.btn-outline-navy {
-  @apply btn border border-navy-800/30 text-navy-900 hover:bg-navy-900/5;
-}
-.card {
-  @apply rounded-xl bg-white shadow-card;
-}
-.badge {
-  @apply inline-flex items-center gap-1 rounded-md bg-navy-900/5 px-2 py-1 text-xs font-semibold text-navy-800;
-}
-.input {
-  @apply w-full rounded-lg border border-navy-900/15 bg-white px-4 py-2.5 text-sm text-navy-900 placeholder:text-navy-900/40 focus:border-brand-blue focus:outline-none focus:ring-1 focus:ring-brand-blue;
-}
-.label {
-  @apply mb-1.5 block text-sm font-bold text-navy-800;
+@layer utilities {
+  /* Hide native scrollbars on horizontal carousels while keeping scroll */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Force LTR rendering for phone numbers, emails, URLs inside RTL UI */
+  .dir-ltr {
+    direction: ltr;
+    text-align: right;
+  }
 }
