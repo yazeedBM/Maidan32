@@ -1,0 +1,147 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ------------------------------------------------------------------ */
+/* Base                                                                */
+/* ------------------------------------------------------------------ */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-surface font-sans text-ink antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-bold;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-white;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  ::selection {
+    @apply bg-accent/25 text-ink;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Components                                                          */
+/* ------------------------------------------------------------------ */
+
+@layer components {
+  /* Page container — 1280px content width, matching the Figma grid */
+  .container-site {
+    @apply mx-auto w-full max-w-container px-5 sm:px-8 lg:px-14;
+  }
+
+  /* ---- Cards ------------------------------------------------------ */
+  .card {
+    @apply rounded-card bg-white shadow-card;
+  }
+
+  /* ---- Form fields ------------------------------------------------ */
+  .field-label {
+    @apply mb-2 block text-[13px] font-bold text-primary;
+  }
+
+  .field-input {
+    @apply w-full rounded-field border border-transparent bg-surface-field px-4 py-2.5
+      text-[13px] font-medium text-ink placeholder:font-normal placeholder:text-ink-faint
+      transition-colors duration-150
+      focus:border-primary focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary;
+  }
+
+  .field-select {
+    @apply field-input cursor-pointer appearance-none bg-no-repeat pl-10;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235B6672' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-position: left 0.85rem center;
+  }
+
+  .field-textarea {
+    @apply field-input min-h-[6.5rem] resize-y;
+  }
+
+  /* ---- Chips ------------------------------------------------------ */
+  .stat-chip {
+    @apply inline-flex items-center gap-1.5 rounded-field border border-black/[0.06]
+      bg-white px-3 py-1.5 text-[12px] font-semibold text-ink-soft shadow-chip;
+  }
+
+  .stat-chip-orange {
+    @apply inline-flex items-center gap-1.5 rounded-field bg-accent-pale px-3 py-1.5
+      text-[12px] font-semibold text-accent;
+  }
+
+  .category-badge {
+    @apply inline-flex items-center rounded-pill bg-accent-soft px-3 py-0.5
+      text-[12px] font-bold text-primary;
+  }
+
+  /* ---- Legacy helpers --------------------------------------------- */
+  /* Used only by the admin + auth screens, which have no Figma frame.
+     Mapped onto the new palette so they stay consistent untouched. */
+  .btn-orange {
+    @apply inline-flex h-11 items-center justify-center rounded-field bg-accent px-6
+      text-[14px] font-bold text-white transition-colors hover:bg-[#E07C05]
+      disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .btn-blue {
+    @apply inline-flex h-11 items-center justify-center rounded-field bg-primary px-6
+      text-[14px] font-bold text-white transition-colors hover:bg-[#04357A]
+      disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .btn-outline-navy {
+    @apply inline-flex items-center justify-center rounded-field border border-primary/30
+      bg-white px-4 py-2 text-[13px] font-bold text-primary transition-colors
+      hover:border-primary hover:bg-primary/5;
+  }
+
+  .input {
+    @apply field-input;
+  }
+
+  /* ---- Section headings ------------------------------------------- */
+  .section-title {
+    @apply text-[34px] font-extrabold leading-tight text-primary sm:text-[42px];
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Utilities                                                           */
+/* ------------------------------------------------------------------ */
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .dir-ltr {
+    direction: ltr;
+    text-align: right;
+  }
+}
