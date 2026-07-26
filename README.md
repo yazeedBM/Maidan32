@@ -1,34 +1,50 @@
 # 🏆 ميدان (Maidan) — Hackathon Directory & Team Matching
 
-A minimal, full-stack application designed for browsing hackathons and helping solo participants find teams seamlessly.
-
-**Tech Stack:** Next.js 14 (App Router) · PostgreSQL (via Prisma on [Neon](https://neon.tech)) · JWT Auth (httpOnly cookie) · Tailwind CSS
-
----
-
-## ✨ Features
-
-* **Hackathon Directory:** Browse all available hackathons and click into dedicated detail pages.
-* **External Redirects:** Prominent calls-to-action on detail pages linking out to official hackathon websites.
-* **Seamless Team Formation:** Admins can open teams; users can join with a single click. A global **"أعثر على فريق"** page allows users to search open teams across all hackathons.
-* **Privacy-First Contact Info:** A member's email and phone number are only revealed to their active teammates (strictly enforced server-side).
-* **Mini-CV Profiles:** Users can easily build and edit their bio, skills, experience entries, and external links at any time.
-* **Secure Authentication:** Simple email/password signup and login for both Admins and Regular Users, utilizing JWTs stored in httpOnly cookies.
-* **Admin Dashboard:** Powerful controls to add or delete hackathons and generate open teams.
+Front-end only. Next.js 14 (App Router) + Tailwind CSS. **No database, no API
+routes, no authentication, no environment variables.** Everything renders from
+static content in `lib/sampleData.js`, so the site builds and deploys anywhere
+with zero configuration.
 
 ---
 
-## 🚀 Getting Started (Local Development)
+## 🚀 Run locally
 
-### 1. Database Setup (Neon)
-The database uses a free, hosted Postgres instance on Neon—no credit card required, and it works out of the box with Vercel without managing persistent disks.
-1. Go to [neon.tech](https://neon.tech) and sign up.
-2. Create a new project (any name/region works).
-3. Copy the **connection string** from your project dashboard (it will start with `postgresql://...`).
-
-### 2. Environment Configuration
-Clone the repository and install the dependencies:
 ```bash
 npm install
-cp .env.local.example .env.local
-cp .env.local.example .env
+npm run dev
+```
+
+Open http://localhost:3000
+
+## 📦 Build
+
+```bash
+npm run build
+npm start
+```
+
+## ☁️ Deploy
+
+Import the repo into Vercel (or Netlify / Cloudflare Pages) and deploy. There
+is nothing to configure — no connection string, no secrets.
+
+---
+
+## 🗂 Structure
+
+```
+app/         routes (home, hackathons, hackathon detail, teams, create ad,
+             join request, profile, login, signup)
+components/  UI components (navbar, hero, cards, forms, newsletter, footer)
+lib/         sampleData.js — the hackathon and team-ad content
+public/      images
+```
+
+## 📝 Forms
+
+All forms (newsletter, create team ad, join request, profile, login, signup)
+are intact and fully interactive: they validate and confirm client-side. They
+do not send data anywhere, because there is no server. To connect one later,
+replace the marked `TODO` in the relevant `handleSubmit` / `handlePublish`
+function with a `fetch()` to whatever service you choose — Formspree, Google
+Forms, a Google Sheet webhook, or your own API. No other change is needed.

@@ -1,125 +1,119 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import Logo from "./Logo";
+import { MenuIcon, CloseIcon } from "./Icons";
 
-const links = [
+const NAV_LINKS = [
   { href: "/", label: "الرئيسية" },
   { href: "/hackathons", label: "الهاكاثونات" },
   { href: "/teams", label: "أعثر على فريق" },
   { href: "/#about", label: "عن ميدان" },
 ];
 
-export default function Navbar({ user, transparent = false }) {
-  const router = useRouter();
+/**
+ * Site navigation.
+ *
+ * In every Figma frame the wordmark sits on the LEFT edge and the links on
+ * the RIGHT — so inside the RTL container the nav is placed first in DOM
+ * order and the logo last, which flips them to the correct visual sides.
+ *
+ * variant="dark"  → transparent over the dark hero (home, hackathons)
+ * variant="light" → over the blue matching-page hero
+ * variant="solid" → opaque blue bar for the form pages
+ */
+export default function Navbar({ variant = "dark" }) {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname() || "/";
 
-  async function handleLogout() {
-    await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/");
-    router.refresh();
-  }
+  const onDark = variant !== "light";
+
+  const linkColor = onDark
+    ? "text-white/90 hover:text-accent"
+    : "text-primary hover:text-accent";
 
   return (
-    <header
-      className={`sticky top-0 z-40 ${
-        transparent ? "bg-navy-950/95 backdrop-blur" : "bg-navy-950"
-      } border-b border-white/5`}
-    >
-      <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3.5 md:px-6">
-        <Logo variant="light" />
+    <header className="absolute inset-x-0 top-0 z-40">
+      <div className="container-site flex h-[88px] items-center justify-between">
+        {/* Links — first in DOM so RTL places them on the right */}
+        <nav aria-label="التنقل الرئيسي" className="hidden md:block">
+          <ul className="flex items-center gap-8 lg:gap-10">
+            {NAV_LINKS.map((link) => {
+              const isActive =
+                link.href === "/"
+                  ? pathname === "/"
+                  : link.href.startsWith("/#")
+                  ? false
+                  : pathname.startsWith(link.href);
+              return (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className={`text-[19px] font-semibold leading-none transition-colors duration-150 ${
+                      isActive ? "text-accent" : linkColor
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
 
-        <ul className="hidden items-center gap-7 md:flex">
-          {links.map((l) => (
-            <li key={l.href}>
-              <Link
-                href={l.href}
-                className="text-sm font-semibold text-white/80 transition hover:text-white"
-              >
-                {l.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
-
-        <div className="hidden items-center gap-3 md:flex">
-          {user ? (
-            <>
-              {user.role === "admin" && (
-                <Link href="/admin/hackathons" className="text-sm font-semibold text-brand-orange">
-                  لوحة المشرف
-                </Link>
-              )}
-              <Link href="/profile" className="text-sm font-semibold text-white/80 hover:text-white">
-                {user.fullName}
-              </Link>
-              <button onClick={handleLogout} className="btn-outline !py-2">
-                تسجيل الخروج
-              </button>
-            </>
-          ) : (
-            <>
-              <Link href="/login" className="btn-outline !py-2">
-                تسجيل الدخول
-              </Link>
-              <Link href="/signup" className="btn-orange !py-2">
-                إنشاء حساب
-              </Link>
-            </>
-          )}
-        </div>
-
+        {/* Mobile toggle — also right side */}
         <button
-          className="text-white md:hidden"
+          type="button"
           onClick={() => setOpen((v) => !v)}
-          aria-label="القائمة"
+          aria-expanded={open}
+          aria-controls="mobile-nav"
+          aria-label={open ? "إغلاق القائمة" : "فتح القائمة"}
+          className={`md:hidden inline-flex h-10 w-10 items-center justify-center rounded-field ${
+            onDark ? "text-white" : "text-primary"
+          }`}
         >
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
+          {open ? <CloseIcon /> : <MenuIcon />}
         </button>
-      </nav>
 
+        {/* Wordmark — last in DOM so RTL places it on the left */}
+        <Link
+          href="/"
+          aria-label="ميدان — الصفحة الرئيسية"
+          className={`shrink-0 ${onDark ? "text-white" : "text-primary"}`}
+        >
+          <Logo className="h-[38px] w-auto sm:h-[47px]" />
+        </Link>
+      </div>
+
+      {/* Mobile dropdown */}
       {open && (
-        <div className="border-t border-white/10 px-4 pb-4 md:hidden">
-          <ul className="flex flex-col gap-3 pt-3">
-            {links.map((l) => (
-              <li key={l.href}>
-                <Link href={l.href} className="text-sm font-semibold text-white/85" onClick={() => setOpen(false)}>
-                  {l.label}
+        <nav
+          id="mobile-nav"
+          aria-label="التنقل الرئيسي للجوال"
+          className={`md:hidden mx-5 rounded-card p-3 shadow-card-lg ${
+            onDark ? "bg-dark" : "bg-white"
+          }`}
+        >
+          <ul className="flex flex-col">
+            {NAV_LINKS.map((link) => (
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  onClick={() => setOpen(false)}
+                  className={`block rounded-field px-3 py-2.5 text-[15px] font-semibold ${
+                    onDark
+                      ? "text-white/90 hover:bg-white/10"
+                      : "text-primary hover:bg-primary/5"
+                  }`}
+                >
+                  {link.label}
                 </Link>
               </li>
             ))}
           </ul>
-          <div className="mt-4 flex flex-col gap-2">
-            {user ? (
-              <>
-                {user.role === "admin" && (
-                  <Link href="/admin/hackathons" className="btn-outline w-full">
-                    لوحة المشرف
-                  </Link>
-                )}
-                <Link href="/profile" className="btn-outline w-full">
-                  {user.fullName}
-                </Link>
-                <button onClick={handleLogout} className="btn-orange w-full">
-                  تسجيل الخروج
-                </button>
-              </>
-            ) : (
-              <>
-                <Link href="/login" className="btn-outline w-full">
-                  تسجيل الدخول
-                </Link>
-                <Link href="/signup" className="btn-orange w-full">
-                  إنشاء حساب
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
+        </nav>
       )}
     </header>
   );

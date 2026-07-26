@@ -1,204 +1,165 @@
 "use client";
 
 import { useState } from "react";
+import { SubmitButton, OutlineBlueButton } from "./Buttons";
+import { FILTER_OPTIONS } from "@/lib/sampleData";
 
-function emptyExperience() {
-  return { title: "", description: "", year: "" };
-}
+/**
+ * Profile edit form styled to the design system (same field styles as the
+ * join-request form). Accepts an optional `user` object to prefill.
+ * NOTE: no Figma frame exists for profile — extended from the system.
+ */
+export default function ProfileForm({ user = {} }) {
+  const [form, setForm] = useState({
+    firstName: user.firstName ?? "",
+    lastName: user.lastName ?? "",
+    email: user.email ?? "",
+    phone: user.phone ?? "+966",
+    educationStatus: user.educationStatus ?? "",
+    linkedin: user.linkedin ?? "",
+    skills: user.skills ?? "",
+    bio: user.bio ?? "",
+  });
+  const [saved, setSaved] = useState(false);
 
-export default function ProfileForm({ initialUser }) {
-  const [fullName, setFullName] = useState(initialUser.fullName || "");
-  const [phone, setPhone] = useState(initialUser.phone || "");
-  const [bio, setBio] = useState(initialUser.profile?.bio || "");
-  const [skills, setSkills] = useState(initialUser.profile?.skills || []);
-  const [skillInput, setSkillInput] = useState("");
-  const [experience, setExperience] = useState(initialUser.profile?.experience || []);
-  const [links, setLinks] = useState(
-    initialUser.profile?.links || { github: "", linkedin: "", portfolio: "" }
-  );
-  const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState("");
+  const set = (key) => (e) => {
+    setSaved(false);
+    setForm((prev) => ({ ...prev, [key]: e.target.value }));
+  };
 
-  function addSkill(e) {
-    e.preventDefault();
-    const s = skillInput.trim();
-    if (s && !skills.includes(s)) setSkills([...skills, s]);
-    setSkillInput("");
-  }
-
-  function removeSkill(s) {
-    setSkills(skills.filter((x) => x !== s));
-  }
-
-  function updateExperience(idx, field, value) {
-    setExperience((prev) =>
-      prev.map((exp, i) => (i === idx ? { ...exp, [field]: value } : exp))
-    );
-  }
-
-  function addExperience() {
-    setExperience((prev) => [...prev, emptyExperience()]);
-  }
-
-  function removeExperience(idx) {
-    setExperience((prev) => prev.filter((_, i) => i !== idx));
-  }
-
-  async function handleSave(e) {
-    e.preventDefault();
-    setSaving(true);
-    setMessage("");
-    const res = await fetch("/api/profile", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        fullName,
-        phone,
-        profile: { bio, skills, experience, links },
-      }),
-    });
-    setSaving(false);
-    setMessage(res.ok ? "تم حفظ التغييرات بنجاح" : "تعذر حفظ التغييرات");
+  function handleSave() {
+    // TODO: PATCH to your profile endpoint.
+    setSaved(true);
   }
 
   return (
-    <form onSubmit={handleSave} className="space-y-8">
-      {/* Basic info */}
-      <div className="card space-y-4 p-6">
-        <h2 className="text-lg font-extrabold text-navy-900">المعلومات الأساسية</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
+    <div className="card p-6 sm:p-10">
+      <h2 className="text-2xl font-extrabold text-accent">البيانات الشخصية</h2>
+
+      <div className="mt-8 space-y-6">
+        <div className="grid gap-5 sm:grid-cols-2">
           <div>
-            <label className="label">الاسم الكامل</label>
-            <input className="input" value={fullName} onChange={(e) => setFullName(e.target.value)} />
+            <label htmlFor="pf-first" className="field-label">
+              الاسم الأول
+            </label>
+            <input
+              id="pf-first"
+              type="text"
+              value={form.firstName}
+              onChange={set("firstName")}
+              className="field-input"
+            />
           </div>
           <div>
-            <label className="label">رقم الهاتف (يظهر لزملاء فريقك فقط)</label>
-            <input className="input" value={phone} onChange={(e) => setPhone(e.target.value)} />
+            <label htmlFor="pf-last" className="field-label">
+              الاسم الأخير
+            </label>
+            <input
+              id="pf-last"
+              type="text"
+              value={form.lastName}
+              onChange={set("lastName")}
+              className="field-input"
+            />
           </div>
         </div>
+
+        <div className="grid gap-5 sm:grid-cols-2">
+          <div>
+            <label htmlFor="pf-email" className="field-label">
+              البريد الإلكتروني
+            </label>
+            <input
+              id="pf-email"
+              type="email"
+              value={form.email}
+              onChange={set("email")}
+              className="field-input dir-ltr"
+            />
+          </div>
+          <div>
+            <label htmlFor="pf-phone" className="field-label">
+              رقم الهاتف
+            </label>
+            <input
+              id="pf-phone"
+              type="tel"
+              value={form.phone}
+              onChange={set("phone")}
+              className="field-input dir-ltr"
+            />
+          </div>
+        </div>
+
+        <div className="grid gap-5 sm:grid-cols-2">
+          <div>
+            <label htmlFor="pf-edu" className="field-label">
+              الحالة الدراسية
+            </label>
+            <select
+              id="pf-edu"
+              value={form.educationStatus}
+              onChange={set("educationStatus")}
+              className="field-select"
+            >
+              <option value="">اختر</option>
+              {FILTER_OPTIONS.educationStatus.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="pf-linkedin" className="field-label">
+              حساب Linkedin (إن وجد)
+            </label>
+            <input
+              id="pf-linkedin"
+              type="url"
+              placeholder="linkedin.com/in/yourprofile"
+              value={form.linkedin}
+              onChange={set("linkedin")}
+              className="field-input dir-ltr"
+            />
+          </div>
+        </div>
+
         <div>
-          <label className="label">نبذة عني</label>
-          <textarea
-            className="input min-h-24"
-            value={bio}
-            onChange={(e) => setBio(e.target.value)}
-            placeholder="اكتب نبذة مختصرة عن نفسك وشغفك واهتماماتك..."
-          />
-        </div>
-      </div>
-
-      {/* Skills */}
-      <div className="card space-y-4 p-6">
-        <h2 className="text-lg font-extrabold text-navy-900">المهارات</h2>
-        <div className="flex gap-2">
+          <label htmlFor="pf-skills" className="field-label">
+            المهارات الحالية
+          </label>
           <input
-            className="input"
-            placeholder="أضف مهارة (مثال: تصميم UX)"
-            value={skillInput}
-            onChange={(e) => setSkillInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && addSkill(e)}
+            id="pf-skills"
+            type="text"
+            value={form.skills}
+            onChange={set("skills")}
+            className="field-input"
           />
-          <button onClick={addSkill} className="btn-blue shrink-0">إضافة</button>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {skills.map((s) => (
-            <span key={s} className="badge gap-2">
-              {s}
-              <button type="button" onClick={() => removeSkill(s)} className="text-red-600">×</button>
-            </span>
-          ))}
-          {skills.length === 0 && <p className="text-sm text-navy-800/50">لم تُضف أي مهارات بعد.</p>}
-        </div>
-      </div>
-
-      {/* Experience */}
-      <div className="card space-y-4 p-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-extrabold text-navy-900">الخبرات</h2>
-          <button type="button" onClick={addExperience} className="btn-outline-navy !py-1.5 !px-3 text-xs">
-            + أضف خبرة
-          </button>
         </div>
 
-        {experience.length === 0 && (
-          <p className="text-sm text-navy-800/50">لم تُضف أي خبرات بعد.</p>
-        )}
+        <div>
+          <label htmlFor="pf-bio" className="field-label">
+            نبذة عنك
+          </label>
+          <textarea
+            id="pf-bio"
+            placeholder="أخبرنا عن خبراتك ومشاركاتك السابقة"
+            value={form.bio}
+            onChange={set("bio")}
+            className="field-textarea"
+          />
+        </div>
 
-        <div className="space-y-4">
-          {experience.map((exp, idx) => (
-            <div key={idx} className="rounded-lg border border-navy-900/10 p-4">
-              <div className="mb-3 flex items-center justify-between">
-                <span className="text-xs font-bold text-navy-800/50">خبرة #{idx + 1}</span>
-                <button
-                  type="button"
-                  onClick={() => removeExperience(idx)}
-                  className="text-xs font-bold text-red-600"
-                >
-                  حذف
-                </button>
-              </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <input
-                  className="input"
-                  placeholder="المسمى (مثال: مطور واجهات أمامية)"
-                  value={exp.title}
-                  onChange={(e) => updateExperience(idx, "title", e.target.value)}
-                />
-                <input
-                  className="input"
-                  placeholder="السنة (مثال: 2025)"
-                  value={exp.year}
-                  onChange={(e) => updateExperience(idx, "year", e.target.value)}
-                />
-              </div>
-              <textarea
-                className="input mt-3 min-h-16"
-                placeholder="وصف مختصر للمهام والإنجازات"
-                value={exp.description}
-                onChange={(e) => updateExperience(idx, "description", e.target.value)}
-              />
-            </div>
-          ))}
+        <div className="flex flex-col-reverse gap-4 pt-2 sm:flex-row">
+          <OutlineBlueButton href="/" className="flex-1">
+            إلغاء
+          </OutlineBlueButton>
+          <SubmitButton onClick={handleSave} className="flex-1">
+            {saved ? "تم الحفظ ✓" : "حفظ التغييرات"}
+          </SubmitButton>
         </div>
       </div>
-
-      {/* Links */}
-      <div className="card space-y-4 p-6">
-        <h2 className="text-lg font-extrabold text-navy-900">روابط</h2>
-        <div className="grid gap-4 sm:grid-cols-3">
-          <div>
-            <label className="label">GitHub</label>
-            <input
-              className="input"
-              value={links.github}
-              onChange={(e) => setLinks({ ...links, github: e.target.value })}
-            />
-          </div>
-          <div>
-            <label className="label">LinkedIn</label>
-            <input
-              className="input"
-              value={links.linkedin}
-              onChange={(e) => setLinks({ ...links, linkedin: e.target.value })}
-            />
-          </div>
-          <div>
-            <label className="label">Portfolio</label>
-            <input
-              className="input"
-              value={links.portfolio}
-              onChange={(e) => setLinks({ ...links, portfolio: e.target.value })}
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-4">
-        <button type="submit" disabled={saving} className="btn-orange">
-          {saving ? "جاري الحفظ..." : "حفظ التغييرات"}
-        </button>
-        {message && <span className="text-sm text-navy-800/70">{message}</span>}
-      </div>
-    </form>
+    </div>
   );
 }

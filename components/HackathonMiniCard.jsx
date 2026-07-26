@@ -1,26 +1,55 @@
-import Link from "next/link";
+import { CategoryBadge, HackathonStats } from "./Chips";
 
-export default function HackathonMiniCard({ hackathon }) {
-  const dateStr = new Date(hackathon.date).toLocaleDateString("ar-SA", {
-    day: "numeric",
-    month: "long",
-  });
+/**
+ * Compact hackathon summary shown at the top of the create-ad and
+ * join-request pages: orange title, category row, an optional target-member
+ * block (join page only), then the stat chip row.
+ */
+export default function HackathonMiniCard({ teamAd, memberNumber }) {
+  const member = memberNumber
+    ? teamAd.members.find((m) => m.number === memberNumber)
+    : null;
 
   return (
-    <Link
-      href={`/hackathons/${hackathon._id}`}
-      className="card group block overflow-hidden"
-    >
-      <div className="relative flex h-36 items-end bg-gradient-to-br from-navy-800 to-navy-950 p-4">
-        <span className="badge bg-white/90 text-navy-900">{dateStr}</span>
-      </div>
-      <div className="p-4">
-        <p className="text-xs font-semibold text-brand-orange">{hackathon.organizer || "جهة منظمة"}</p>
-        <h3 className="mt-1 truncate text-base font-extrabold text-navy-900 group-hover:text-brand-blue">
-          {hackathon.title}
-        </h3>
-        <p className="mt-1 truncate text-xs text-navy-800/60">{hackathon.location}</p>
-      </div>
-    </Link>
+    <section aria-label="ملخص الهاكاثون" className="card p-6 text-right sm:p-7">
+      <h2 className="text-[20px] font-extrabold text-accent">
+        {teamAd.hackathonTitle}
+      </h2>
+
+      <p className="mt-3 flex items-center gap-2 text-[13px] font-bold text-primary">
+        التصنيف : <CategoryBadge>{teamAd.category}</CategoryBadge>
+      </p>
+
+      {member && (
+        <div className="mt-3 space-y-[3px] text-[13px]">
+          <p className="font-extrabold text-primary">العضو رقم {member.number}</p>
+          <div className="flex flex-wrap gap-x-10 gap-y-1">
+            <p className="font-bold text-primary">
+              الجنس :{" "}
+              <span className="font-medium text-ink-soft">{member.gender}</span>
+            </p>
+            <p className="font-bold text-primary">
+              الدور :{" "}
+              <span className="font-medium text-ink-soft">{member.role}</span>
+            </p>
+            <p className="font-bold text-primary">
+              المهارات المطلوبة :{" "}
+              <span className="font-medium text-ink-soft">
+                {member.skills.join("، ")}
+              </span>
+            </p>
+          </div>
+        </div>
+      )}
+
+      <HackathonStats
+        date={teamAd.date}
+        location={teamAd.location}
+        prize={teamAd.prize}
+        workDuration={`مدة العمل التقريبية : ${teamAd.workDuration}`}
+        attendance={teamAd.attendance}
+        className="mt-5"
+      />
+    </section>
   );
 }
